@@ -27,6 +27,24 @@ class General(commands.Cog, description="General Commands"):
   )
   async def ping(self, ctx:SlashContext):
     await ctx.send(f"Pong: {round(self.client.latency*1000)}ms")
+  
+  @cog_ext.cog_slash(
+    name='whois',
+    description='Shows xp stats of user',
+    options=[
+      create_option(
+        name='user',
+        description='Choose user',
+        required=True,
+        option_type=6
+      )
+    ]
+  )
+  async def whois(self, ctx:SlashContext, user:str):
+    db=self.cluster.users
+    collection=db[str(ctx.guild.id)]
+    person=await collection.find_one({"_id":str(user.id)})
+    await ctx.send(f"{user}'s nick is {person['name']}")
 
 def setup(client):
   client.add_cog(General(client))
