@@ -354,36 +354,43 @@ class XpCommands(commands.Cog, description="Commands relating to MEE6 levelling 
         value=f"Not enough information",
         inline=True
         )
-    now=datetime.now()
-    hour=int(now.strftime("%H"))-1
-    hours=list(np.arange(0,24))
-    hourlyxp={}
-    person_hourlyxp=person['hourlyxp'][::-1]
-    number=0
-    for x in hours:
-      hourlyxp[x]=[]
-    for x in range(hour,24):
-      hourlyxp[x].append(person_hourlyxp[number])
-      number+=1
-    while True:
-      if number<len(person_hourlyxp):
-        for x in hours:
-          if number<len(person_hourlyxp):
-            hourlyxp[x].append(person_hourlyxp[number])
-            number+=1
-          else:
-            break
-      else:
-        break
-    means={}
-    for x in hourlyxp:
-      means[x]=np.mean(hourlyxp[x])
-    means=dict(sorted(means.items(), key=lambda item: item[1]))
-    embed.add_field(
-      name='Most Active Hour',
-      value=f"{person['name']}'s most active hour is {list(means)[-1]} (UTC)",
-      inline=False
-    )
+    try:
+      now=datetime.now()
+      hour=int(now.strftime("%H"))-1
+      hours=list(np.arange(0,24))
+      hourlyxp={}
+      person_hourlyxp=person['hourlyxp'][::-1]
+      number=0
+      for x in hours:
+        hourlyxp[x]=[]
+      for x in range(hour,24):
+        hourlyxp[x].append(person_hourlyxp[number])
+        number+=1
+      while True:
+        if number<len(person_hourlyxp):
+          for x in hours:
+            if number<len(person_hourlyxp):
+              hourlyxp[x].append(person_hourlyxp[number])
+              number+=1
+            else:
+              break
+        else:
+          break
+      means={}
+      for x in hourlyxp:
+        means[x]=np.mean(hourlyxp[x])
+      means=dict(sorted(means.items(), key=lambda item: item[1]))
+      embed.add_field(
+        name='Most Active Hour',
+        value=f"{person['name']}'s most active hour is {list(means)[-1]} (UTC)",
+        inline=False
+      )
+    except:
+      embed.add_field(
+        name='Most Active Hour',
+        value=f"Not enough information",
+        inline=False
+      )
     await ctx.send(embed=embed)
 
 def setup(client):
