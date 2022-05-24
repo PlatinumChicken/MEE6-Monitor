@@ -48,4 +48,3 @@ class General(commands.Cog, description="General Commands"):
 
 def setup(client):
   client.add_cog(General(client))
-  
