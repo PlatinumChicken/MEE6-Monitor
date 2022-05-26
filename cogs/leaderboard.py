@@ -1,4 +1,3 @@
-from calendar import week
 from datetime import datetime
 import asyncio
 from mee6_py_api import API
@@ -6,7 +5,6 @@ import discord
 from discord.ext import tasks
 from discord.ext import commands
 import os
-import json
 import motor.motor_asyncio
 from datetime import datetime
 from dotenv import load_dotenv

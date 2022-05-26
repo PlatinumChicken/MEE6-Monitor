@@ -1,19 +1,12 @@
-from cProfile import label
-from dis import disco
-from pydoc import describe
 import discord
 from discord.ext import commands
-from matplotlib.transforms import Bbox
 from mee6_py_api import API
 import os
-import json
 import matplotlib.pyplot as plt
 import numpy as np
 import motor.motor_asyncio
-import typing
 from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
-from numpy import require
 import io
 from scipy import stats
 from dotenv import load_dotenv
