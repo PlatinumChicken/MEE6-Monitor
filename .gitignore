@@ -1,5 +1,7 @@
 config.py
 .env
+Procfile
+requirements.txt
 **/.DS_Store
 logs/
 utils/
