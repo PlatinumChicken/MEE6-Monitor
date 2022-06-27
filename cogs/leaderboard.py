@@ -6,7 +6,6 @@ import discord
 from discord.ext import tasks
 from discord.ext import commands
 import os
-import json
 import motor.motor_asyncio
 from datetime import datetime
 from dotenv import load_dotenv
@@ -27,31 +26,34 @@ class Leaderboard(commands.Cog):
     now=datetime.now()
     current_minute=now.strftime("%M")
     current_hour=now.strftime("%H")
-    if current_minute!='00':
+    if current_minute!='26':
       self.ran=False
-    elif current_minute=='00' and not self.ran:
+    elif current_minute=='26' and not self.ran:
       for guild in self.client.guilds:
-        try:
+        if guild.id==928762387874582648:
           #getting xp values
           mee6API = API(guild.id)
           leaderboard_page = await mee6API.levels.get_leaderboard_page(0)
           db=self.cluster.users
           collection=db[str(guild.id)]
           for x in range(len(leaderboard_page['players'])):
-            filterUser={'_id':str(leaderboard_page['players'][x]['id'])}
-            person=await collection.find_one({"_id":str(leaderboard_page['players'][x]['id'])})
-            newXpList=person['xplist']
-            newXpList.append(leaderboard_page['players'][x]['xp'])
-            newValue={'$set': {'xplist':newXpList}}
-            y=await collection.update_one(filterUser, newValue)
-            newValue={'$set': {'totalxp':leaderboard_page['players'][x]['xp']}}
-            y=await collection.update_one(filterUser, newValue)
+            try:
+              filterUser={'_id':str(leaderboard_page['players'][x]['id'])}
+              person=await collection.find_one({"_id":str(leaderboard_page['players'][x]['id'])})
+              newXpList=person['xplist']
+              newXpList.append(leaderboard_page['players'][x]['xp'])
+              newValue={'$set': {'xplist':newXpList}}
+              y=await collection.update_one(filterUser, newValue)
+              newValue={'$set': {'totalxp':leaderboard_page['players'][x]['xp']}}
+              y=await collection.update_one(filterUser, newValue)
+            except:
+              print(f"Error with {leaderboard_page['players'][x]['id']}")
 
           #sending leaderboard
           db=self.cluster.configs
           collection= db[str(guild.id)]
           config=await collection.find_one()
-          channel=self.client.get_channel(id=config['CHANNELID'])
+          channel=self.client.get_channel(id=int(config['CHANNELID']))
           print(channel)
           db=self.cluster.users
           collection=db[str(guild.id)]
@@ -149,8 +151,6 @@ class Leaderboard(commands.Cog):
               elif not weeklyDaysToCatchMessage and config['catch']:
                 embed=discord.Embed(title=f'Days to Catch (Weekly)', description="No one will catch up at the current xp gain rate", color=discord.Colour.dark_red())
                 await channel.send(embed=embed)
-        except:
-          print(f"error in {guild}")
       self.ran=True
 
   @leaderboardUpdate.before_loop

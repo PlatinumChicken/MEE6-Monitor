@@ -52,10 +52,6 @@ class XpGraphs(commands.Cog, description='Graphs relating to MEE6 levelling syst
             value='daily'
           ),
           create_choice(
-            name='daily',
-            value='daily'
-          ),
-          create_choice(
             name='weekly',
             value='weekly'
           )
@@ -160,6 +156,30 @@ class XpGraphs(commands.Cog, description='Graphs relating to MEE6 levelling syst
         ]
       ),
       create_option(
+        name='interval',
+        description='Specify interval',
+        required=True,
+        option_type=3,
+        choices=[
+          create_choice(
+            name='hourly',
+            value='hourly'
+          ),
+          create_choice(
+            name='daily',
+            value='daily'
+          ),
+          create_choice(
+            name='weekly',
+            value='weekly'
+          ),
+          create_choice(
+            name='total',
+            value='total'
+          )
+        ]
+      ),
+      create_option(
         name='length',
         description='Specify number of members shown, defaults to 20 members',
         required=False,
@@ -167,7 +187,7 @@ class XpGraphs(commands.Cog, description='Graphs relating to MEE6 levelling syst
       )
     ]
   )
-  async def topuserschart(self, ctx:SlashContext, graphtype:str, length:int = 0):
+  async def topuserschart(self, ctx:SlashContext, graphtype:str, interval:str, length:int = 0):
     data_stream=io.BytesIO()
     db=self.cluster.users
     collection=db[str(ctx.guild.id)]
@@ -199,6 +219,134 @@ class XpGraphs(commands.Cog, description='Graphs relating to MEE6 levelling syst
     embed=discord.Embed(title=f"Total XP breakdown", color=discord.Color.green())
     embed.set_image(url='attachment://total_xp.png')
     await ctx.send(embed=embed, file=chart)
+
+  @cog_ext.cog_slash(
+    name='xppredict',
+    description='Creates a graph showing your predicted xp gain using linear regression',
+    options=[
+      create_option(
+        name='interval',
+        description='Specify interval',
+        required=True,
+        option_type=3,
+        choices=[
+          create_choice(
+            name='daily',
+            value='daily'
+          ),
+          create_choice(
+            name='daily',
+            value='daily'
+          ),
+          create_choice(
+            name='weekly',
+            value='weekly'
+          )
+        ]
+      ),
+      create_option(
+        name='length',
+        description='amount of predicted xp you want to graph',
+        required=True,
+        option_type=4
+      ),
+      create_option(
+        name='usetotalxp',
+        description='Use total xp or not',
+        required=True,
+        option_type=5
+      )
+    ]
+  )
+  async def xppredict(self, ctx:SlashContext, interval:str, length:int, usetotalxp:bool):
+    data_stream=io.BytesIO()
+    db=self.cluster.users
+    collection=db[str(ctx.guild.id)]
+    person1=await collection.find_one({"_id":str(ctx.author.id)})
+    if usetotalxp:
+      if interval=="daily":
+        if (length-1)*24<=len(person1['xplist']):
+          person1_list=person1['xplist'][(-1*length*24)::24]
+        else:
+          await ctx.send("Length over maximum")
+      elif interval=="weekly":
+        if (length-1)*168<=len(person1['xplist']):
+          person1_list=person1['xplist'][(-1*length*168)::168]
+        else:
+          await ctx.send("Length over maximum")
+    else:
+      if length<=len(person1[str(interval+"xp")]):
+        person1_list=person1[str(interval+"xp")][(-1*length):]
+      else:
+        await ctx.send("Length over maximum")
+    
+
+  @cog_ext.cog_slash(
+    name='comparepredict',
+    description="Graphs your predicted xp gain compared to someone else's",
+    options=[
+      create_option(
+        name='user',
+        description='User you want to compare to',
+        required=True,
+        option_type=6
+      ),
+      create_option(
+        name='interval',
+        description='Specify interval',
+        required=True,
+        option_type=3,
+        choices=[
+          create_choice(
+            name='hourly',
+            value='hourly'
+          ),
+          create_choice(
+            name='daily',
+            value='daily'
+          ),
+          create_choice(
+            name='daily',
+            value='daily'
+          ),
+          create_choice(
+            name='weekly',
+            value='weekly'
+          )
+        ]
+      ),
+      create_option(
+        name='length',
+        description='Specify length of graph',
+        required=True,
+        option_type=4
+      ),
+      create_option(
+        name='usetotalxp',
+        description='Use total xp or not',
+        required=True,
+        option_type=5
+      ),
+      create_option(
+        name='graphtype',
+        description='Specify graph type',
+        required=True,
+        option_type=3,
+        choices=[
+          create_choice(
+            name='Line',
+            value='Line'
+          ),
+          create_choice(
+            name='Bar',
+            value='Bar'
+          )
+        ]
+      )
+    ]
+  )
+  async def comparepredict(self, ctx:SlashContext, user:str, interval:str, length:int, usetotalxp:bool, graphtype:str):
+    pass
 
 def setup(client):
   client.add_cog(XpGraphs(client))
