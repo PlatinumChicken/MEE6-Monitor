@@ -29,7 +29,7 @@ class Leaderboard(commands.Cog):
       self.ran=False
     elif current_minute=='26' and not self.ran:
       for guild in self.client.guilds:
-        if guild.id==928762387874582648:
+        try:
           #getting xp values
           mee6API = API(guild.id)
           leaderboard_page = await mee6API.levels.get_leaderboard_page(0)
@@ -150,6 +150,8 @@ class Leaderboard(commands.Cog):
               elif not weeklyDaysToCatchMessage and config['catch']:
                 embed=discord.Embed(title=f'Days to Catch (Weekly)', description="No one will catch up at the current xp gain rate", color=discord.Colour.dark_red())
                 await channel.send(embed=embed)
+        except:
+          print(f"error in {guild}")
       self.ran=True
 
   @leaderboardUpdate.before_loop
