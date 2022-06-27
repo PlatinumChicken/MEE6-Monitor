@@ -1,4 +1,3 @@
-from calendar import week
 from datetime import datetime
 import asyncio
 from mee6_py_api import API
